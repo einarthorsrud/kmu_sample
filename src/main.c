@@ -16,6 +16,9 @@
 /*
 Write key to KMU.
 
+Write key to KMU slot and configure the slot to be non-readable, non-writable
+and pushable to the CryptoCell AES key register.
+
 This typically happens in a production image, and this key should never exist
 in the product when it is out in the field, as that would compromise the key.
 */
@@ -51,12 +54,12 @@ int use_key_from_kmu(uint32_t slot_id)
 {
 	int ret;
 
-   // Plaintext: abcdefghijklmnop
-   uint8_t plain_text[16] =
-   {
+	// Plaintext: abcdefghijklmnop
+	uint8_t plain_text[16] =
+	{
 		0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
 		0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70
-   };
+	};
 
 	// Ciphertext: fd671e1dc1aca49124704502ea716dba
 	uint8_t cipher_expected[16] =
@@ -80,13 +83,13 @@ int use_key_from_kmu(uint32_t slot_id)
 	}
 	mbedtls_aes_encrypt(&ctx, plain_text, cipher_text);
 
-	if(memcmp(cipher_text, cipher_expected, 16) != 0)
+	if (memcmp(cipher_text, cipher_expected, 16) != 0)
 	{
 		printk("Invalid encrypted KMU ECB.\n");
 		return -1;
 	}
 
-	// Reinitialize encryption.
+	// Reinitialize context.
 	mbedtls_aes_init(&ctx);
 
 	// Set to use direct shadow key for decryption.
@@ -99,7 +102,7 @@ int use_key_from_kmu(uint32_t slot_id)
 
 	mbedtls_aes_decrypt(&ctx, cipher_text, plain_text_decrypted);
 
-	if(memcmp(plain_text, plain_text_decrypted, 16) != 0)
+	if (memcmp(plain_text, plain_text_decrypted, 16) != 0)
 	{
 		printk("Invalid encrypted KMU ECB.\n");
 		return -1;
@@ -111,7 +114,7 @@ int use_key_from_kmu(uint32_t slot_id)
 
 int main(void)
 {
-	const uint32_t slot_id = 2;
+	const uint32_t slot_id = 2; // Must be in region 2-127 (0-1 is reseved for KDR).
 
 	printk("KMU sample started.\n");
 
