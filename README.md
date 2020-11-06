@@ -12,4 +12,7 @@ This sample demonstrates:
   * This is typically done in the field and allows crypto operations without
     the CPU ever being able to access the key.
 
-Tested with NCS 1.4.0.
+Notes:
+
+* Only works in secure mode.
+* Tested with NCS 1.4.0.
